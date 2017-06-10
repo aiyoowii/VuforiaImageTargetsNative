@@ -11,6 +11,7 @@ countries.
 #include <jni.h>
 #include <android/log.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <assert.h>
 
@@ -93,6 +94,8 @@ const int STONES_AND_CHIPS_DATASET_ID = 0;
 const int TARMAC_DATASET_ID = 1;
 const int TEST_DATASET_ID = 2;
 int selectedDataset = TEST_DATASET_ID;
+
+int ij = 1;
 
 // Object to receive update callbacks from Vuforia SDK
 class ImageTargets_UpdateCallback : public Vuforia::UpdateCallback
@@ -444,7 +447,15 @@ void renderFrameForView(const Vuforia::State *state, Vuforia::Matrix44F& project
     glActiveTexture(GL_TEXTURE0);
 
     glBindTexture(GL_TEXTURE_2D, textures[0]->mTextureID);
+
+    if(textureIndex < 2 ){
     glBindTexture(GL_TEXTURE_2D, thisTexture->mTextureID);
+    }else{
+    ij++;
+    ij = ij % textureCount;
+    //glBindTexture(GL_TEXTURE_2D, thisTexture->mTextureID);
+    glBindTexture(GL_TEXTURE_2D, textures[ij]->mTextureID);
+    }
     glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE, (GLfloat*)&modelViewProjection.data[0] );
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const GLvoid*) &planeIndices[0]);
 
