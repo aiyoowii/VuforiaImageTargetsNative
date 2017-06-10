@@ -217,9 +217,12 @@ public class ImageTargets extends Activity implements SampleAppMenuInterface
      */
     private void loadTextures()
     {
+
+        mTextures.add(Texture.loadTextureFromApk("GuBei.jpeg",
+                getAssets()));
         try {
-            for (String s:getAssets().list("penquanrenwu"))
-            mTextures.add(Texture.loadTextureFromApk(s,
+            for (String s : getAssets().list("dance"))
+                mTextures.add(Texture.loadTextureFromApk("dance/" + s,
                     getAssets()));
         } catch (IOException e) {
             e.printStackTrace();

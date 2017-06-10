@@ -92,7 +92,7 @@ Vuforia::CameraDevice::CAMERA_DIRECTION currentCamera;
 const int STONES_AND_CHIPS_DATASET_ID = 0;
 const int TARMAC_DATASET_ID = 1;
 const int TEST_DATASET_ID = 2;
-int selectedDataset = STONES_AND_CHIPS_DATASET_ID;
+int selectedDataset = TEST_DATASET_ID;
 
 // Object to receive update callbacks from Vuforia SDK
 class ImageTargets_UpdateCallback : public Vuforia::UpdateCallback
@@ -108,7 +108,7 @@ class ImageTargets_UpdateCallback : public Vuforia::UpdateCallback
             Vuforia::ObjectTracker* objectTracker = static_cast<Vuforia::ObjectTracker*>(
                 trackerManager.getTracker(Vuforia::ObjectTracker::getClassType()));
             if (objectTracker == 0 || dataSetStonesAndChips == 0 || dataSetTarmac == 0 ||
-                objectTracker->getActiveDataSet(0) == 0)
+                dataSetTest == 0 || objectTracker->getActiveDataSet(0) == 0)
             {
                 LOG("Failed to switch data set.");
                 return;
@@ -119,7 +119,7 @@ class ImageTargets_UpdateCallback : public Vuforia::UpdateCallback
                 case STONES_AND_CHIPS_DATASET_ID:
                     if (objectTracker->getActiveDataSet(0) != dataSetStonesAndChips)
                     {
-                        objectTracker->deactivateDataSet(dataSetTarmac);
+                        objectTracker->deactivateDataSet(objectTracker->getActiveDataSet(0));
                         objectTracker->activateDataSet(dataSetStonesAndChips);
                     }
                     break;
@@ -127,11 +127,11 @@ class ImageTargets_UpdateCallback : public Vuforia::UpdateCallback
                 case TARMAC_DATASET_ID:
                     if (objectTracker->getActiveDataSet(0) != dataSetTarmac)
                     {
-                        objectTracker->deactivateDataSet(dataSetStonesAndChips);
+                        objectTracker->deactivateDataSet(objectTracker->getActiveDataSet(0));
                         objectTracker->activateDataSet(dataSetTarmac);
                     }
                     break;
-                default:
+                case TEST_DATASET_ID:
                     if (objectTracker->getActiveDataSet(0) != dataSetTest)
                     {
                         objectTracker->deactivateDataSet(objectTracker->getActiveDataSet(0));
@@ -443,6 +443,7 @@ void renderFrameForView(const Vuforia::State *state, Vuforia::Matrix44F& project
 
     glActiveTexture(GL_TEXTURE0);
 
+    glBindTexture(GL_TEXTURE_2D, textures[0]->mTextureID);
     glBindTexture(GL_TEXTURE_2D, thisTexture->mTextureID);
     glUniformMatrix4fv(mvpMatrixHandle, 1, GL_FALSE, (GLfloat*)&modelViewProjection.data[0] );
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const GLvoid*) &planeIndices[0]);
@@ -840,9 +841,11 @@ Java_com_vuforia_samples_ImageTargets_ImageTargetsRenderer_initRendering(
         glBindTexture(GL_TEXTURE_2D, textures[i]->mTextureID);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textures[i]->mWidth,
-                textures[i]->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                (GLvoid*)  textures[i]->mData);
+        glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textures[i]->mWidth,
+            textures[i]->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            (GLvoid*)  textures[i]->mData);
     }
   
     shaderProgramID     = SampleUtils::createProgramFromBuffer(cubeMeshVertexShader,
