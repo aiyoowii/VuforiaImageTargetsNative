@@ -132,7 +132,7 @@ class ImageTargets_UpdateCallback : public Vuforia::UpdateCallback
                     }
                     break;
                 default:
-                    if (objectTracker->getActiveDataSet(0) != dataSetTarmac)
+                    if (objectTracker->getActiveDataSet(0) != dataSetTest)
                     {
                         objectTracker->deactivateDataSet(objectTracker->getActiveDataSet(0));
                         objectTracker->activateDataSet(dataSetTest);
